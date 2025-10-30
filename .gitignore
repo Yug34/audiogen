@@ -1,0 +1,58 @@
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.code-workspace
+
+# --- Env / Secrets ---
+.env
+.env.*
+.venv/
+.python-version
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+pip-log.txt
+
+# --- Caches ---
+.cache/
+.pytest_cache/
+coverage/
+**/coverage/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Node / Frontend ---
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+.next/
+.nuxt/
+.turbo/
+.parcel-cache/
+.vite/
+
+# --- Misc tool artifacts ---
+tmp/
+temp/
+.DS_Store?
+
+

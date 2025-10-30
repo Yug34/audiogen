@@ -6,8 +6,8 @@
 
 #### 1.1.1 Monorepo Structure
 
-- [ ] Create monorepo root with `docker-compose.yml` for local development
-- [ ] Set up shared `.gitignore` for Python, Node, and IDE files
+- [x] Create monorepo root with `docker-compose.yml` for local development
+- [x] Set up shared `.gitignore` for Python, Node, and IDE files
 - [ ] Create `backend/` directory with FastAPI application structure
 - [ ] Create `frontend/` directory with React + Vite setup
 - [ ] Create `worker/` directory for async job processing
