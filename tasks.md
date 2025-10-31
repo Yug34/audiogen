@@ -10,8 +10,8 @@
 - [x] Set up shared `.gitignore` for Python, Node, and IDE files
 - [x] Create `backend/` directory with FastAPI application structure
 - [x] Create `frontend/` directory with React + Vite setup
-- [ ] Create `worker/` directory for async job processing
-- [ ] Create `infra/` directory for Docker files, k8s manifests (optional)
+- [x] Create `worker/` directory for async job processing
+- [x] Create `infra/` directory for Docker files, k8s manifests (optional)
 - [ ] Add root `README.md` with setup instructions and architecture overview
 - [ ] Set up `.env.example` files for each service
 

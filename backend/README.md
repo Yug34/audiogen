@@ -16,6 +16,7 @@
 3. Configure environment
 
 - Copy `env.example` to `.env` and adjust values
+  - `REDIS_URL` defaults to `redis://redis:6379/0` in Docker
 
 4. Run dev server
 
@@ -25,8 +26,16 @@
 
 - `GET /health` → service status
 - `GET /api/hello` → sample data
+- `POST /api/jobs/audio` → enqueue audio processing job
+  - body: `{ "audio_path": "/path/to/audio.wav" }`
+- `GET /api/jobs/{job_id}` → job status/result
 
 ## CORS
 
 - Set `CORS_ORIGIN` to your frontend URL(s), e.g. `http://localhost:3000`.
 - Multiple origins can be comma-separated.
+
+## RQ / Redis
+
+- The API enqueues jobs to the `audio` queue in Redis (`REDIS_URL`).
+- The RQ worker runs separately and processes `worker.tasks.audio_to_musicxml`.
