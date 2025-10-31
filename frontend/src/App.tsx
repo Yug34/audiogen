@@ -1,8 +1,19 @@
+import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
+import Navbar from "./components/ui/navbar";
+
 export function App() {
+  const { login, register, user, isAuthenticated, isLoading, logout } =
+    useKindeAuth();
+
   return (
     <div className="min-h-screen min-w-screen flex flex-col">
+      <Navbar />
       <main className="w-full h-full flex items-center justify-center">
-        <h1 className="text-4xl font-bold">Hello World</h1>
+        {isAuthenticated ? (
+          <h1 className="text-4xl font-bold">Hello {user?.givenName}</h1>
+        ) : (
+          <h1 className="text-4xl font-bold">Hello World</h1>
+        )}
       </main>
     </div>
   );

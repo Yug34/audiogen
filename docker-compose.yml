@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   api:
@@ -8,76 +8,14 @@ services:
     container_name: gen_api
     command: sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-4000}"
     environment:
-      # App
       PORT: ${PORT:-4000}
       ENV: ${ENV:-development}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
-      # Database (SQLAlchemy-style URL)
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://postgres:postgres@postgres:5432/gen}
-      # Redis
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      # S3 / MinIO
-      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://minio:9000}
-      S3_BUCKET_UPLOADS: ${S3_BUCKET_UPLOADS:-uploads}
-      S3_BUCKET_ARTIFACTS: ${S3_BUCKET_ARTIFACTS:-artifacts}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
     ports:
       - "4000:4000"
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request,sys; urllib.request.urlopen("http://localhost:%s/health"%(__import__("os").environ.get("PORT","4000"))); sys.exit(0)' || exit 1"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-
-  worker:
-    build:
-      context: ./worker
-      dockerfile: Dockerfile
-    container_name: gen_worker
-    environment:
-      ENV: ${ENV:-development}
-      # Database
-      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://postgres:postgres@postgres:5432/gen}
-      # Redis
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      # S3 / MinIO
-      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://minio:9000}
-      S3_BUCKET_UPLOADS: ${S3_BUCKET_UPLOADS:-uploads}
-      S3_BUCKET_ARTIFACTS: ${S3_BUCKET_ARTIFACTS:-artifacts}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    command: ["sh", "-c", "python -m worker.main"]
-
-  redis:
-    image: redis:7-alpine
-    container_name: gen_redis
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
+      - postgres
 
   postgres:
     image: postgres:16-alpine
@@ -90,49 +28,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      # Optionally mount init SQL schema at ./infra/postgres/init
-      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  minio:
-    image: quay.io/minio/minio:RELEASE.2024-09-22T00-33-43Z
-    container_name: gen_minio
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
-    ports:
-      - "9000:9000"   # S3 API
-      - "9001:9001"   # Console
-    volumes:
-      - minio-data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-
-  minio-init:
-    image: quay.io/minio/mc:RELEASE.2024-09-16T17-43-14Z
-    container_name: gen_minio_init
-    depends_on:
-      minio:
-        condition: service_healthy
-    entrypoint: ["/bin/sh", "-c"]
-    command: >-
-      "mc config host add local http://minio:9000 ${AWS_ACCESS_KEY_ID:-minioadmin} ${AWS_SECRET_ACCESS_KEY:-minioadmin} &&
-      mc mb -p local/${S3_BUCKET_UPLOADS:-uploads} || true &&
-      mc mb -p local/${S3_BUCKET_ARTIFACTS:-artifacts} || true &&
-      mc anonymous set public local/${S3_BUCKET_UPLOADS:-uploads} || true &&
-      mc anonymous set public local/${S3_BUCKET_ARTIFACTS:-artifacts} || true"
 
 volumes:
   postgres-data:
-  redis-data:
-  minio-data:
-
-

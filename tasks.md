@@ -8,8 +8,8 @@
 
 - [x] Create monorepo root with `docker-compose.yml` for local development
 - [x] Set up shared `.gitignore` for Python, Node, and IDE files
-- [ ] Create `backend/` directory with FastAPI application structure
-- [ ] Create `frontend/` directory with React + Vite setup
+- [x] Create `backend/` directory with FastAPI application structure
+- [x] Create `frontend/` directory with React + Vite setup
 - [ ] Create `worker/` directory for async job processing
 - [ ] Create `infra/` directory for Docker files, k8s manifests (optional)
 - [ ] Add root `README.md` with setup instructions and architecture overview
