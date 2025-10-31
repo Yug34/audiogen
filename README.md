@@ -46,7 +46,7 @@ The easiest way to get started is using Docker Compose:
 
    ```bash
    git clone <repository-url>
-   cd gen
+   cd audiogen
    ```
 
 2. **Set up environment variables**:
@@ -56,7 +56,7 @@ The easiest way to get started is using Docker Compose:
    # Database
    POSTGRES_USER=postgres
    POSTGRES_PASSWORD=postgres
-   POSTGRES_DB=gen
+   POSTGRES_DB=audiogen
 
    # Redis
    REDIS_URL=redis://redis:6379/0
@@ -65,7 +65,7 @@ The easiest way to get started is using Docker Compose:
    PORT=4000
    CORS_ORIGIN=*
    ENV=development
-   DATABASE_URL=postgresql+psycopg2://postgres:postgres@postgres:5432/gen
+   DATABASE_URL=postgresql+psycopg2://postgres:postgres@postgres:5432/audiogen
 
    # MinIO (S3)
    MINIO_ROOT_USER=minioadmin
@@ -73,7 +73,7 @@ The easiest way to get started is using Docker Compose:
    S3_ENDPOINT=http://minio:9000
    S3_ACCESS_KEY=minioadmin
    S3_SECRET_KEY=minioadmin
-   S3_BUCKET=gen-artifacts
+   S3_BUCKET=audiogen-artifacts
    ```
 
 3. **Start all services**:
@@ -88,15 +88,15 @@ The easiest way to get started is using Docker Compose:
 
    - Access MinIO Console at http://localhost:9001
    - Login with `minioadmin` / `minioadmin`
-   - Create bucket: `gen-artifacts`
+   - Create bucket: `audiogen-artifacts`
    - Set bucket policy to "public" if needed
 
    Option B - Using MinIO Client (if `mc` is installed locally):
 
    ```bash
    mc alias set local http://localhost:9000 minioadmin minioadmin
-   mc mb local/gen-artifacts
-   mc anonymous set public local/gen-artifacts
+   mc mb local/audiogen-artifacts
+   mc anonymous set public local/audiogen-artifacts
    ```
 
 5. **Verify services are running**:
@@ -151,7 +151,7 @@ The easiest way to get started is using Docker Compose:
 
    ```env
    REDIS_URL=redis://localhost:6379/0
-   DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/gen
+   DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/audiogen
    ```
 
 6. Run migrations (if using Alembic):
@@ -268,7 +268,7 @@ For detailed infrastructure documentation, see [infra/README.md](infra/README.md
 ## Project Structure
 
 ```
-gen/
+audiogen/
 ├── backend/              # FastAPI application
 │   ├── app/              # Application code
 │   ├── Dockerfile        # Backend container
