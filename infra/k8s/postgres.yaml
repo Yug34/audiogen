@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: gen
+  namespace: audiogen
 spec:
   selector:
     app: postgres
@@ -15,7 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: gen
+  namespace: audiogen
 labels:
   app: postgres
 spec:
@@ -33,10 +33,10 @@ spec:
           image: postgres:16-alpine
           env:
             - name: POSTGRES_DB
-              value: gen
+              value: audiogen
             - name: POSTGRES_USER
-              value: gen
+              value: audiogen
             - name: POSTGRES_PASSWORD
-              value: gen
+              value: audiogen
           ports:
             - containerPort: 5432

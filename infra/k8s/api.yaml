@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api
-  namespace: gen
+  namespace: audiogen
 labels:
   app: api
 spec:
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/your-org/gen-api:latest
+          image: ghcr.io/your-org/audiogen-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -29,7 +29,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: api
-  namespace: gen
+  namespace: audiogen
 spec:
   selector:
     app: api

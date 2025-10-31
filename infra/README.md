@@ -14,8 +14,8 @@ Notes:
 Quick start (kubectl):
 
 1. kubectl apply -f k8s/namespace.yaml
-2. kubectl -n gen apply -f k8s/
+2. kubectl -n audiogen apply -f k8s/
 
 Namespace:
 
-- All resources target the `gen` namespace.
+- All resources target the `audiogen` namespace.
