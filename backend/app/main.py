@@ -40,7 +40,6 @@ def health():
 def hello():
     return {"message": "Hello from FastAPI"}
 
-
 class AudioJobRequest(BaseModel):
     audio_path: str
 
@@ -146,3 +145,6 @@ def get_job_v1(job_id: str):
     """Get job status with v1 API format"""
     return get_job(job_id)
 
+@app.get("/api/v1/allTracks")
+def all_tracks():
+    return {"message": "All tracks"}

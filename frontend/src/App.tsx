@@ -2,10 +2,19 @@ import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 import Navbar from "./components/ui/navbar";
 import FileUpload from "./components/FileUpload";
 import { Input } from "./components/ui/input";
+import { useEffect } from "react";
 
 export function App() {
   const { login, register, user, isAuthenticated, isLoading, logout } =
     useKindeAuth();
+
+  useEffect(() => {
+    fetch("http://localhost:4000/api/v1/allTracks")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen min-w-screen flex flex-col">

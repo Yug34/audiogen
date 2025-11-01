@@ -12,11 +12,22 @@ export default function FileUpload() {
     if (files) {
       const file = files[0];
       console.log("File uploaded:", file);
-      fetch("/api/v1/jobs", {
+      const formData = new FormData();
+      formData.append("file", file);
+      fetch("http://localhost:4000/api/v1/jobs", {
         method: "POST",
-        body: file,
+        body: formData,
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((err) => {
+              throw new Error(
+                err.detail || `HTTP error! status: ${response.status}`
+              );
+            });
+          }
+          return response.json();
+        })
         .then((data) => {
           console.log("Upload response:", data);
         })
