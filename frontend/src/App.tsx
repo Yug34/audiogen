@@ -9,7 +9,7 @@ export function App() {
     useKindeAuth();
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/v1/allTracks")
+    fetch(`${import.meta.env.VITE_API_URL}/api/v1/allTracks`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);

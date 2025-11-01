@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import tempfile
@@ -45,12 +45,13 @@ class AudioJobRequest(BaseModel):
 
 
 @app.post("/api/v1/jobs")
-async def create_job(file: UploadFile = File(...)):
+async def create_job(file: UploadFile = File(...), songName: str = Form(...)):
     """Upload audio file and create processing job"""
+    print(f"Song name: {songName}")
     # Validate file extension
     allowed_extensions = {".mp3", ".wav", ".flac", ".m4a", ".ogg"}
     file_ext = Path(file.filename).suffix.lower()
-    
+        
     if file_ext not in allowed_extensions:
         raise HTTPException(
             status_code=400,
