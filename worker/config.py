@@ -2,7 +2,8 @@ import os
 
 
 def get_redis_url() -> str:
-    return os.getenv("REDIS_URL", "redis://redis:6379/0")
+    # return os.getenv("REDIS_URL", "redis://redis:6379/0")
+    return os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 
 def get_queue_names() -> list[str]:

@@ -12,12 +12,12 @@
 - [x] Create `frontend/` directory with React + Vite setup
 - [x] Create `worker/` directory for async job processing
 - [x] Create `infra/` directory for Docker files, k8s manifests (optional)
-- [ ] Add root `README.md` with setup instructions and architecture overview
-- [ ] Set up `.env.example` files for each service
+- [x] Add root `README.md` with setup instructions and architecture overview
+- [x] Set up `.env.example` files for each service
 
 #### 1.1.2 Docker Infrastructure
 
-- [ ] Create `backend/Dockerfile` with Python 3.11+, install FastAPI dependencies
+- [x] Create `backend/Dockerfile` with Python 3.11+, install FastAPI dependencies
 - [ ] Create `worker/Dockerfile` with ML dependencies (librosa, torch, HTDemucs, ONNX Runtime)
 - [ ] Create `docker-compose.yml` with services: api, worker, redis, postgres, minio (S3-compatible)
 - [ ] Create `docker-compose.dev.yml` for local development with volume mounts

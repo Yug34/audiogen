@@ -12,6 +12,7 @@ def audio_to_musicxml(audio_path: str) -> str:
     if not Path(audio_path).exists():
         raise FileNotFoundError(f"Audio file not found: {audio_path}")
 
+    print(f"Processing audio file: {audio_path}")
     # TODO: load model, perform inference, generate MusicXML
     # Placeholder minimal MusicXML structure
     return "<score-partwise version=\"3.1\"></score-partwise>"
