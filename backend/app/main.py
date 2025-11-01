@@ -44,13 +44,6 @@ class AudioJobRequest(BaseModel):
     audio_path: str
 
 
-@app.post("/api/jobs/audio")
-def create_audio_job(req: AudioJobRequest):
-    """Legacy endpoint: accepts audio_path as string"""
-    job = audio_q.enqueue("worker.tasks.audio_to_musicxml", req.audio_path, job_timeout=3600)
-    return {"job_id": job.get_id()}
-
-
 @app.post("/api/v1/jobs")
 async def create_job(file: UploadFile = File(...)):
     """Upload audio file and create processing job"""
