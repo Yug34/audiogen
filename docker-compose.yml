@@ -76,6 +76,7 @@ services:
     container_name: audiogen_worker
     environment:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://postgres:postgres@postgres:5432/audiogen}
       RQ_QUEUES: ${RQ_QUEUES:-audio,default}
       S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
@@ -83,6 +84,7 @@ services:
       S3_BUCKET: ${S3_BUCKET:-audiogen-artifacts}
     depends_on:
       - redis
+      - postgres
       - minio
     command: sh -c "python -m worker.worker"
 

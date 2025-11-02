@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import tempfile
@@ -7,8 +7,17 @@ from pathlib import Path
 from redis import Redis
 from rq import Queue
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.database import init_db, get_db, engine
+from app.models import Song, Transcription
 
 app = FastAPI(title="audiogen-backend")
+
+# Initialize database on startup
+@app.on_event("startup")
+def startup_event():
+    init_db()
 
 cors_origins_env = os.getenv("CORS_ORIGIN", "*")
 origins = [o.strip() for o in cors_origins_env.split(",")] if cors_origins_env else ["*"]
@@ -45,7 +54,11 @@ class AudioJobRequest(BaseModel):
 
 
 @app.post("/api/v1/jobs")
-async def create_job(file: UploadFile = File(...), songName: str = Form(...)):
+async def create_job(
+    file: UploadFile = File(...), 
+    songName: str = Form(...),
+    db: Session = Depends(get_db)
+):
     """Upload audio file and create processing job"""
     print(f"Song name: {songName}")
     # Validate file extension
@@ -65,26 +78,42 @@ async def create_job(file: UploadFile = File(...), songName: str = Form(...)):
     try:
         # Read and save file
         contents = await file.read()
+        file_size = len(contents)
         
         # Check file size (30MB limit)
         max_size = 30 * 1024 * 1024  # 30MB
-        if len(contents) > max_size:
+        if file_size > max_size:
             raise HTTPException(status_code=400, detail="File too large. Maximum size: 30MB")
         
         with open(file_path, "wb") as f:
             f.write(contents)
         
-        # Enqueue job with file path
+        # Save song details to database first
+        song = Song(
+            name=songName
+        )
+        db.add(song)
+        db.commit()
+        db.refresh(song)
+        
+        # Enqueue job with file path, song name, and song_id
         job = audio_q.enqueue(
             "worker.tasks.audio_to_musicxml",
             str(file_path),
+            songName,
+            str(song.id),
             job_timeout=3600
         )
+        
+        # Update song with job_id
+        song.job_id = job.get_id()
+        db.commit()
         
         return {
             "id": job.get_id(),
             "status": "queued",
-            "estimated_seconds": 60
+            "estimated_seconds": 60,
+            "song_id": str(song.id)
         }
     
     except HTTPException:
