@@ -4,10 +4,18 @@ import os
 import tempfile
 import uuid
 from pathlib import Path
+import sys
 from redis import Redis
 from rq import Queue
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+import requests
+from requests.exceptions import RequestException
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+from worker.s3_client import get_transcription_from_s3
 
 from app.database import init_db, get_db, engine
 from app.models import Song
@@ -170,4 +178,25 @@ def get_job_v1(job_id: str, db: Session = Depends(get_db)):
 @app.get("/api/v1/allTracks")
 def all_tracks(db: Session = Depends(get_db)):
     songs = db.query(Song).order_by(Song.created_at.desc()).all()
-    return songs
+    return [{"id": song.id, "name": song.name} for song in songs]
+
+
+@app.get("/api/v1/tracks/{track_id}")
+def get_track(track_id: str, db: Session = Depends(get_db)):
+    song = db.query(Song).filter(Song.id == track_id).first()
+    if not song:
+        raise HTTPException(status_code=404, detail="Track not found")
+    transcription_text = None
+    try:
+        transcription_text = get_transcription_from_s3(song.id, song.name)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch transcription: {str(exc)}")
+
+    return {
+        "id": str(song.id),
+        "name": song.name,
+        "job_id": song.job_id,
+        "transcription": transcription_text,
+        "created_at": song.created_at.isoformat() if song.created_at else None,
+        "updated_at": song.updated_at.isoformat() if song.updated_at else None,
+    }

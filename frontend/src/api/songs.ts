@@ -1,11 +1,24 @@
 import { Song } from "../types";
 
-const fetchAllTracks = async (): Promise<Song[]> => {
+const fetchAllTracks = async (): Promise<{ id: string; name: string }[]> => {
   const response = await fetch(
     `${import.meta.env.VITE_API_URL}/api/v1/allTracks`
   );
   const data = await response.json();
-  return data as Song[];
+  return data as { id: string; name: string }[];
 };
 
-export { fetchAllTracks };
+const fetchTrackById = async (id: string): Promise<Song> => {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/v1/tracks/${id}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch track with id ${id}`);
+  }
+
+  const data = await response.json();
+  return data as Song;
+};
+
+export { fetchAllTracks, fetchTrackById };

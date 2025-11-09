@@ -9,11 +9,13 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
   const { login, register, user, isAuthenticated, isLoading, logout } =
     useKindeAuth();
-  const [allTracks, setAllTracks] = useState<Song[]>([]);
+  const [allTracks, setAllTracks] = useState<{ id: string; name: string }[]>(
+    []
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAllTracks().then((data: Song[]) => {
+    fetchAllTracks().then((data: { id: string; name: string }[]) => {
       console.log(data);
       setAllTracks(data);
     });
@@ -30,11 +32,11 @@ const Home = () => {
         <h1 className="text-4xl font-bold">Hello World</h1>
       )}
       <Input type="text" placeholder="Search" />
-      {allTracks.map((track: Song) => (
+      {allTracks.map((track: { id: string; name: string }) => (
         <div key={track.id}>
           <div>{track.name}</div>
           <button onClick={() => navigate(`/track/${track.id}`)}>
-            {track.id}
+            {track.name}
           </button>
         </div>
       ))}

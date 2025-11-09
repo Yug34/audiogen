@@ -1,9 +1,9 @@
 type Song = {
   created_at: string;
   id: string;
-  job_id: string;
+  job_id: string | null;
   name: string;
-  transcription_url: string;
+  transcription_url: string | null;
   updated_at: string;
 };
 

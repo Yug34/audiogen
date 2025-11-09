@@ -53,9 +53,7 @@ def save_transcription_to_s3(content: str, song_id: str, song_name: str) -> Opti
         Object key (path) in S3 bucket, or None if upload failed
     """
     try:
-        print(1)
         s3_client, bucket = get_s3_client()
-        print(2)
         # Generate object key: transcriptions/{song_id}/{song_name}.musicxml
         # Sanitize song_name for filesystem compatibility
         safe_song_name = "".join(c for c in song_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
@@ -82,3 +80,22 @@ def save_transcription_to_s3(content: str, song_id: str, song_name: str) -> Opti
         print(f"Error saving transcription to S3: {str(e)}")
         return None
 
+def get_transcription_from_s3(song_id: str, song_name: str) -> Optional[str]:
+    """Get MusicXML transcription content from S3/MinIO and return the object key.
+    
+    Args:
+        song_id: UUID of the song
+        song_name: Name of the song (used in file path)
+    Returns:
+        Object key (path) in S3 bucket, or None if upload failed
+    """
+    try:
+        s3_client, bucket = get_s3_client()
+        safe_song_name = "".join(c for c in song_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        safe_song_name = safe_song_name.replace(' ', '_')
+        object_key = f"transcriptions/{song_id}/{safe_song_name}.musicxml"
+        response = s3_client.get_object(Bucket=bucket, Key=object_key)
+        return response['Body'].read().decode('utf-8')
+    except Exception as e:
+        print(f"Error getting transcription from S3: {str(e)}")
+        return None
