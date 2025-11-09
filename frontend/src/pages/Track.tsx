@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { OpenSheetMusicDisplay } from "opensheetmusicdisplay";
 import { fetchTrackById } from "../api/songs";
 import { Song } from "../types";
 
@@ -8,13 +9,26 @@ const Track = () => {
   const [track, setTrack] = useState<Song | null>(null);
   const [musicXml, setMusicXml] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [renderError, setRenderError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const osmdRef = useRef<OpenSheetMusicDisplay | null>(null);
 
   useEffect(() => {
-    if (musicXml) {
-      console.log(musicXml);
+    if (!containerRef.current || osmdRef.current) {
+      return;
     }
-  }, [musicXml]);
+
+    osmdRef.current = new OpenSheetMusicDisplay(containerRef.current, {
+      autoResize: true,
+      backend: "svg",
+    });
+
+    return () => {
+      osmdRef.current?.clear();
+      osmdRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!id) {
@@ -26,14 +40,12 @@ const Track = () => {
       setLoading(true);
       setError(null);
       setMusicXml(null);
+      setRenderError(null);
 
       try {
-        const data = (await fetchTrackById(id)) as Song & {
-          transcription: string;
-        };
+        const data = await fetchTrackById(id);
         setTrack(data);
-        console.log(data);
-        setMusicXml(data.transcription);
+        setMusicXml(data.transcription ?? null);
       } catch (err) {
         console.error(err);
         if (err instanceof Error) {
@@ -48,6 +60,42 @@ const Track = () => {
 
     loadTrack();
   }, [id]);
+
+  useEffect(() => {
+    const osmd = osmdRef.current;
+
+    if (!osmd) {
+      return;
+    }
+
+    if (!musicXml) {
+      osmd.clear();
+      return;
+    }
+
+    let cancelled = false;
+
+    const renderScore = async () => {
+      setRenderError(null);
+      try {
+        await osmd.load(musicXml);
+        if (!cancelled) {
+          await osmd.render();
+        }
+      } catch (err) {
+        console.error("Failed to render MusicXML", err);
+        if (!cancelled) {
+          setRenderError("Unable to render the MusicXML score.");
+        }
+      }
+    };
+
+    renderScore();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [musicXml]);
 
   return (
     <div className="space-y-4">
@@ -75,14 +123,18 @@ const Track = () => {
         </div>
       )}
 
-      {musicXml && (
-        <div>
-          <h2 className="text-xl font-semibold">MusicXML Transcription</h2>
-          <pre className="whitespace-pre-wrap overflow-auto border rounded p-4 max-h-96">
-            {musicXml}
-          </pre>
-        </div>
-      )}
+      {renderError && <p className="text-red-600">{renderError}</p>}
+
+      <div>
+        <h2 className="text-xl font-semibold">MusicXML Transcription</h2>
+        {!musicXml && !loading && (
+          <p>Transcription is not available yet for this track.</p>
+        )}
+        <div
+          ref={containerRef}
+          className="mt-4 min-h-[200px] overflow-auto rounded border bg-white p-4"
+        />
+      </div>
     </div>
   );
 };

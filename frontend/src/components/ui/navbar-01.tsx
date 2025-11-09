@@ -10,6 +10,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { cn } from "../../lib/utils";
 import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
+import { useNavigate } from "react-router-dom";
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -94,8 +95,7 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
 }
 // Default navigation links
 const defaultNavigationLinks: Navbar01NavLink[] = [
-  { href: "#", label: "Home", active: true },
-  { href: "#", label: "Features" },
+  { href: "/", label: "Home", active: true },
 ];
 export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
   (
@@ -114,6 +114,8 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
     },
     ref
   ) => {
+    const navigate = useNavigate();
+
     const { isAuthenticated, login, register, logout, user } = useKindeAuth();
     const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
@@ -175,7 +177,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                       {navigationLinks.map((link, index) => (
                         <NavigationMenuItem key={index} className="w-full">
                           <button
-                            onClick={(e) => e.preventDefault()}
+                            onClick={() => navigate(link.href)}
                             className={cn(
                               "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
                               link.active
@@ -195,7 +197,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
             {/* Main nav */}
             <div className="flex items-center gap-6">
               <button
-                onClick={(e) => e.preventDefault()}
+                onClick={() => navigate("/")}
                 className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors cursor-pointer"
               >
                 <div className="text-2xl">{logo}</div>
@@ -210,7 +212,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                     {navigationLinks.map((link, index) => (
                       <NavigationMenuItem key={index}>
                         <button
-                          onClick={(e) => e.preventDefault()}
+                          onClick={() => navigate(link.href)}
                           className={cn(
                             "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
                             link.active

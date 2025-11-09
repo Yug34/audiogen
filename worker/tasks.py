@@ -39,6 +39,10 @@ def audio_to_musicxml(audio_path: str, songName: str, song_id: str) -> str:
     # TODO: load model, perform inference, generate MusicXML
     # Placeholder minimal MusicXML structure
     musicxml = f"""
+    <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC
+  "-//Recordare//DTD MusicXML 3.1 Partwise//EN"
+  "https://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.1">
 <work><work-title>{songName}</work-title></work>
   <part-list>
