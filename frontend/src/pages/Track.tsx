@@ -74,6 +74,7 @@ const Track = () => {
     }
 
     let cancelled = false;
+    console.log(musicXml);
 
     const renderScore = async () => {
       setRenderError(null);

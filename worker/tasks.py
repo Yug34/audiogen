@@ -39,22 +39,28 @@ def audio_to_musicxml(audio_path: str, songName: str, song_id: str) -> str:
     # TODO: load model, perform inference, generate MusicXML
     # Placeholder minimal MusicXML structure
     musicxml = f"""
-    <?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE score-partwise PUBLIC
   "-//Recordare//DTD MusicXML 3.1 Partwise//EN"
-  "https://www.musicxml.org/dtds/partwise.dtd">
+  "http://www.musicxml.org/dtds/partwise.dtd">
+
 <score-partwise version="3.1">
-<work><work-title>{songName}</work-title></work>
+  <work><work-title>{songName}</work-title></work>
+
   <part-list>
     <score-part id="P1">
-      <part-name>Drums</part-name>
-      <score-instrument id="P1-I1">
-        <instrument-name>Drum Kit</instrument-name>
-      </score-instrument>
-      <midi-instrument id="P1-I1">
-        <midi-channel>10</midi-channel>
-        <midi-program>1</midi-program>
-      </midi-instrument>
+      <part-name>Drum Set</part-name>
+
+      <!-- Force 5 lines at the part-definition level -->
+      <staff-details>
+        <staff-lines>5</staff-lines>
+      </staff-details>
+
+      <score-instrument id="P1-I1"><instrument-name>Kick</instrument-name></score-instrument>
+      <score-instrument id="P1-I2"><instrument-name>Snare</instrument-name></score-instrument>
+
+      <midi-instrument id="P1-I1"/>
+      <midi-instrument id="P1-I2"/>
     </score-part>
   </part-list>
 
@@ -62,88 +68,74 @@ def audio_to_musicxml(audio_path: str, songName: str, song_id: str) -> str:
     <measure number="1">
       <attributes>
         <divisions>4</divisions>
-        <key>
-          <fifths>0</fifths>
-        </key>
-        <time>
-          <beats>4</beats>
-          <beat-type>4</beat-type>
-        </time>
+
+        <!-- also set staff-lines here -->
+        <staff-details>
+          <staff-lines>5</staff-lines>
+        </staff-details>
+
+        <time><beats>4</beats><beat-type>4</beat-type></time>
+
         <clef>
           <sign>percussion</sign>
           <line>2</line>
         </clef>
       </attributes>
 
-      <!-- Beat 1: Kick -->
+      <!-- Kick - beat 1 (moved lower: C2) -->
       <note>
-        <pitch>
+        <unpitched>
           <step>C</step>
           <octave>2</octave>
-        </pitch>
-        <duration>4</duration>
-        <type>quarter</type>
-        <voice>1</voice>
-        <instrument id="P1-I1"/>
-        <staff>1</staff>
-        <unpitched>
           <display-step>C</display-step>
           <display-octave>2</display-octave>
         </unpitched>
-        <notations>
-          <tied type="start"/>
-        </notations>
+        <duration>4</duration>
+        <type>quarter</type>
+        <instrument id="P1-I1"/>
+        <voice>1</voice>
+        <staff>1</staff>
       </note>
 
-      <!-- Beat 2: Kick -->
+      <!-- Kick - beat 2 (C2) -->
       <note>
-        <pitch>
+        <unpitched>
           <step>C</step>
           <octave>2</octave>
-        </pitch>
+        </unpitched>
         <duration>4</duration>
         <type>quarter</type>
-        <voice>1</voice>
         <instrument id="P1-I1"/>
+        <voice>1</voice>
         <staff>1</staff>
-        <unpitched>
-          <display-step>C</display-step>
-          <display-octave>2</display-octave>
-        </unpitched>
       </note>
 
-      <!-- Beat 3: Kick -->
+      <!-- Kick - beat 3 (C2) -->
       <note>
-        <pitch>
+        <unpitched>
           <step>C</step>
           <octave>2</octave>
-        </pitch>
+        </unpitched>
         <duration>4</duration>
         <type>quarter</type>
-        <voice>1</voice>
         <instrument id="P1-I1"/>
+        <voice>1</voice>
         <staff>1</staff>
-        <unpitched>
-          <display-step>C</display-step>
-          <display-octave>2</display-octave>
-        </unpitched>
       </note>
 
-      <!-- Beat 4: Snare -->
+      <!-- Snare - beat 4 (unchanged) -->
       <note>
-        <pitch>
-          <step>D</step>
-          <octave>2</octave>
-        </pitch>
+        <unpitched>
+          <step>C</step>
+          <octave>5</octave>
+          <display-step>C</display-step>
+          <display-octave>5</display-octave>
+        </unpitched>
         <duration>4</duration>
         <type>quarter</type>
+        <instrument id="P1-I2"/>
         <voice>1</voice>
-        <instrument id="P1-I1"/>
         <staff>1</staff>
-        <unpitched>
-          <display-step>D</display-step>
-          <display-octave>2</display-octave>
-        </unpitched>
       </note>
 
     </measure>
