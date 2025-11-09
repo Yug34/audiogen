@@ -1,3 +1,5 @@
-__all__ = []
+from . import tasks
+
+__all__ = ["tasks"]
 
 

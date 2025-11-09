@@ -8,10 +8,13 @@ from uuid import UUID
 # Add parent directory to path to import backend models
 # This allows the worker to import from backend module
 root_dir = os.path.join(os.path.dirname(__file__), '..')
+backend_dir = os.path.join(os.path.dirname(__file__), '..', 'backend')
 sys.path.insert(0, os.path.abspath(root_dir))
+sys.path.insert(0, os.path.abspath(backend_dir))
 
 from backend.app.database import get_db_session
-from backend.app.models import Song, Transcription
+from backend.app.models import Song
+from worker.s3_client import save_transcription_to_s3
 
 
 def audio_to_musicxml(audio_path: str, songName: str, song_id: str) -> str:
@@ -35,10 +38,121 @@ def audio_to_musicxml(audio_path: str, songName: str, song_id: str) -> str:
     
     # TODO: load model, perform inference, generate MusicXML
     # Placeholder minimal MusicXML structure
-    musicxml = f"<score-partwise version=\"3.1\"><work><work-title>{songName}</work-title></work></score-partwise>"
+    musicxml = f"""
+<score-partwise version="3.1">
+<work><work-title>{songName}</work-title></work>
+  <part-list>
+    <score-part id="P1">
+      <part-name>Drums</part-name>
+      <score-instrument id="P1-I1">
+        <instrument-name>Drum Kit</instrument-name>
+      </score-instrument>
+      <midi-instrument id="P1-I1">
+        <midi-channel>10</midi-channel>
+        <midi-program>1</midi-program>
+      </midi-instrument>
+    </score-part>
+  </part-list>
+
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>4</divisions>
+        <key>
+          <fifths>0</fifths>
+        </key>
+        <time>
+          <beats>4</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <clef>
+          <sign>percussion</sign>
+          <line>2</line>
+        </clef>
+      </attributes>
+
+      <!-- Beat 1: Kick -->
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>2</octave>
+        </pitch>
+        <duration>4</duration>
+        <type>quarter</type>
+        <voice>1</voice>
+        <instrument id="P1-I1"/>
+        <staff>1</staff>
+        <unpitched>
+          <display-step>C</display-step>
+          <display-octave>2</display-octave>
+        </unpitched>
+        <notations>
+          <tied type="start"/>
+        </notations>
+      </note>
+
+      <!-- Beat 2: Kick -->
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>2</octave>
+        </pitch>
+        <duration>4</duration>
+        <type>quarter</type>
+        <voice>1</voice>
+        <instrument id="P1-I1"/>
+        <staff>1</staff>
+        <unpitched>
+          <display-step>C</display-step>
+          <display-octave>2</display-octave>
+        </unpitched>
+      </note>
+
+      <!-- Beat 3: Kick -->
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>2</octave>
+        </pitch>
+        <duration>4</duration>
+        <type>quarter</type>
+        <voice>1</voice>
+        <instrument id="P1-I1"/>
+        <staff>1</staff>
+        <unpitched>
+          <display-step>C</display-step>
+          <display-octave>2</display-octave>
+        </unpitched>
+      </note>
+
+      <!-- Beat 4: Snare -->
+      <note>
+        <pitch>
+          <step>D</step>
+          <octave>2</octave>
+        </pitch>
+        <duration>4</duration>
+        <type>quarter</type>
+        <voice>1</voice>
+        <instrument id="P1-I1"/>
+        <staff>1</staff>
+        <unpitched>
+          <display-step>D</display-step>
+          <display-octave>2</display-octave>
+        </unpitched>
+      </note>
+
+    </measure>
+  </part>
+</score-partwise>
+"""
     print(f"MusicXML: {musicxml}")
     
-    # Save transcription to database
+    # Save transcription to MinIO/S3
+    transcription_url = save_transcription_to_s3(musicxml, song_id, songName)
+    print(f"Transcription URL: {transcription_url}")
+    
+    # Update song record with transcription URL
     try:
         with get_db_session() as db:
             # Convert song_id string to UUID if needed
@@ -49,25 +163,13 @@ def audio_to_musicxml(audio_path: str, songName: str, song_id: str) -> str:
             if not song:
                 raise ValueError(f"Song with ID {song_id} not found in database")
             
-            # Create or update transcription
-            transcription = db.query(Transcription).filter(Transcription.song_id == song_uuid).first()
-            if transcription:
-                # Update existing transcription
-                transcription.musicxml = musicxml
-                transcription.status = "completed"
-            else:
-                # Create new transcription
-                transcription = Transcription(
-                    song_id=song_uuid,
-                    musicxml=musicxml,
-                    status="completed"
-                )
-                db.add(transcription)
+            # Update song with transcription URL
+            song.transcription_url = transcription_url
             # get_db_session context manager will commit on successful exit
-            print(f"Transcription saved to database for song {song_id}")
+            print(f"Transcription URL saved to database for song {song_id}: {transcription_url}")
     except Exception as e:
-        print(f"Error saving transcription to database: {str(e)}")
-        # Continue even if database save fails - still return the musicxml
+        print(f"Error saving transcription URL to database: {str(e)}")
+        # Continue even if database update fails - still return the musicxml
         # You might want to handle this differently in production
     
     return musicxml

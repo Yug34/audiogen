@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import init_db, get_db, engine
-from app.models import Song, Transcription
+from app.models import Song
 
 app = FastAPI(title="audiogen-backend")
 
@@ -70,32 +70,28 @@ async def create_job(
             status_code=400,
             detail=f"Invalid file format. Allowed: {', '.join(allowed_extensions)}"
         )
-    
     # Save uploaded file to temporary directory
     file_id = str(uuid.uuid4())
     file_path = TEMP_UPLOAD_DIR / f"{file_id}{file_ext}"
-    
     try:
         # Read and save file
         contents = await file.read()
         file_size = len(contents)
-        
         # Check file size (30MB limit)
         max_size = 30 * 1024 * 1024  # 30MB
         if file_size > max_size:
             raise HTTPException(status_code=400, detail="File too large. Maximum size: 30MB")
-        
         with open(file_path, "wb") as f:
             f.write(contents)
-        
         # Save song details to database first
         song = Song(
-            name=songName
+            name=songName,
+            transcription_url=None
         )
         db.add(song)
         db.commit()
         db.refresh(song)
-        
+
         # Enqueue job with file path, song name, and song_id
         job = audio_q.enqueue(
             "worker.tasks.audio_to_musicxml",
@@ -104,11 +100,11 @@ async def create_job(
             str(song.id),
             job_timeout=3600
         )
-        
+        print(f"Job enqueued")
         # Update song with job_id
         song.job_id = job.get_id()
         db.commit()
-        
+        print(f"Song job_id updated")
         return {
             "id": job.get_id(),
             "status": "queued",
@@ -129,7 +125,7 @@ async def create_job(
 
 
 @app.get("/api/jobs/{job_id}")
-def get_job(job_id: str):
+def get_job(job_id: str, db: Session = Depends(get_db)):
     """Get job status and result"""
     from rq.job import Job
     
@@ -143,15 +139,18 @@ def get_job(job_id: str):
             "progress": 0
         }
         
+        # Look up song by job_id to get transcription_url
+        song = db.query(Song).filter(Song.job_id == job_id).first()
+        
         if status == "finished":
             response["result"] = job.result
             response["progress"] = 100
-            # Return MusicXML string in artifacts format
+            # Return MusicXML transcription URL from songs table
+            transcription_url = song.transcription_url if song else None
             response["artifacts"] = {
                 "musicxml": {
                     "type": "musicxml",
-                    "url": None,  # Would be S3 URL in production
-                    "content": job.result  # Return MusicXML string directly for testing
+                    "url": transcription_url,  # S3/MinIO URL for the transcription
                 }
             }
         elif status == "failed":
@@ -164,10 +163,11 @@ def get_job(job_id: str):
 
 
 @app.get("/api/v1/jobs/{job_id}")
-def get_job_v1(job_id: str):
+def get_job_v1(job_id: str, db: Session = Depends(get_db)):
     """Get job status with v1 API format"""
-    return get_job(job_id)
+    return get_job(job_id, db)
 
 @app.get("/api/v1/allTracks")
-def all_tracks():
-    return {"message": "All tracks"}
+def all_tracks(db: Session = Depends(get_db)):
+    songs = db.query(Song).order_by(Song.created_at.desc()).all()
+    return songs
