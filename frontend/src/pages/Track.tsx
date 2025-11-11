@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay";
 import { fetchTrackById } from "../api/songs";
 import { Song } from "../types";
+import { defaultMusicXml } from "./constants";
 
 const Track = () => {
   const { id } = useParams();
@@ -45,7 +46,8 @@ const Track = () => {
       try {
         const data = await fetchTrackById(id);
         setTrack(data);
-        setMusicXml(data.transcription ?? null);
+        setMusicXml(defaultMusicXml);
+        // setMusicXml(data.transcription ?? null);
       } catch (err) {
         console.error(err);
         if (err instanceof Error) {
