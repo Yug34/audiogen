@@ -5,17 +5,6 @@ export const defaultMusicXml = `
   "http://www.musicxml.org/dtds/partwise.dtd">
 
 <score-partwise version="4.0">
-   <identification>
-      <encoding>
-         <software>Finale v27.0 for Mac</software>
-         <encoding-date>2021-04-16</encoding-date>
-         <supports element="print" attribute="new-system" type="yes" value="yes"/>
-         <supports element="print" attribute="new-page" type="yes" value="yes"/>
-         <supports element="accidental" type="yes"/>
-         <supports element="beam" type="yes"/>
-         <supports element="stem" type="yes"/>
-      </encoding>
-   </identification>
    <defaults>
       <scaling>
          <millimeters>7.2319</millimeters>
@@ -135,7 +124,7 @@ export const defaultMusicXml = `
                <fifths>0</fifths>
                <mode>major</mode>
             </key>
-            <time symbol="common">
+            <time>
                <beats>4</beats>
                <beat-type>4</beat-type>
             </time>
@@ -527,16 +516,16 @@ export const defaultMusicXml = `
             <voice>2</voice>
             <type>eighth</type>
          </note>
-         <note default-x="230">
+         <note default-x="78">
             <unpitched>
                <display-step>A</display-step>
                <display-octave>2</display-octave>
             </unpitched>
-            <duration>1</duration>
+            <duration>2</duration>
             <instrument id="P1-X2"/>
             <voice>2</voice>
-            <type>eighth</type>
-            <stem default-y="-70">down</stem>
+            <type>quarter</type>
+            <stem default-y="-65">down</stem>
          </note>
       </measure>
    </part>

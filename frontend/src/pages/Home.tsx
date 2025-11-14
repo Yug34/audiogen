@@ -16,7 +16,6 @@ const Home = () => {
 
   useEffect(() => {
     fetchAllTracks().then((data: { id: string; name: string }[]) => {
-      console.log(data);
       setAllTracks(data);
     });
   }, []);
