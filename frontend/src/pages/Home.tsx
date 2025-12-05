@@ -22,7 +22,7 @@ const Home = () => {
 
   return (
     <>
-      {isAuthenticated ? (
+      {true ? (
         <>
           <h1 className="text-4xl font-bold">Hello {user?.givenName}</h1>
           <FileUpload />

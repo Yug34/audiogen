@@ -172,10 +172,16 @@ def transcribe_audio_to_midi(audio_path: str):
             
             print(f"Pitch track extracted: {len(pitch_track)} frames")
             valid_pitch_count = np.sum(pitch_track > 0)
-            print(f"Valid pitches detected: {valid_pitch_count} frames ({100*valid_pitch_count/len(pitch_track):.1f}%)")
+            
+            # Check if pitch_track is empty to avoid division by zero
+            if len(pitch_track) > 0:
+                valid_percentage = 100 * valid_pitch_count / len(pitch_track)
+                print(f"Valid pitches detected: {valid_pitch_count} frames ({valid_percentage:.1f}%)")
+            else:
+                print(f"Valid pitches detected: {valid_pitch_count} frames (N/A - empty pitch track)")
             
             # If we don't have enough valid pitches, try a simpler approach
-            if valid_pitch_count < len(pitch_track) * 0.1:  # Less than 10% valid
+            if len(pitch_track) > 0 and valid_pitch_count < len(pitch_track) * 0.1:  # Less than 10% valid
                 print("Low pitch detection rate, trying alternative method...")
                 # Use harmonic-percussive separation and re-detect
                 try:
