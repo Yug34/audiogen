@@ -23,5 +23,7 @@ COPY worker/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY worker /app/worker
+COPY audio.mp3 /app/audio.mp3
+COPY sample.mp3 /app/sample.mp3
 
 CMD ["python", "worker/transcribe.py"]
